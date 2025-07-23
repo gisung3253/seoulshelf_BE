@@ -1,0 +1,5 @@
+# 환경 변수 (보안 정보)
+.env
+
+# Node.js
+node_modules/
