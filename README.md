@@ -1,267 +1,177 @@
-# Seoul Shelf 백엔드
+# 📚 Seoul Shelf - 독서 커뮤니티
 
-책 추천, 리뷰, 알림 등 다양한 커뮤니티 기능을 제공하는 웹 서서비스의 백엔드입니다.  
-Node.js와 Express, MySQL을 기반으로 하며, JWT 인증과 Swagger 기반 API 문서를 지원합니다.
+도서관에서 책을 빌려 읽고 나서 **"이 책 어땠는지 다른 사람들과 이야기하고 싶다"**는 생각이 들었지만, 주변에 같은 책을 읽은 사람을 찾기 어려웠습니다. 기존 독서 앱들도 너무 복잡해서 사용하기 불편했습니다. 그래서 **간단하게 책 후기를 작성하고 다른 사람들과 소통할 수 있는** 웹사이트를 개발했습니다.
 
----
-
-## 목차
-- [기술 스택](#기술-스택)
-- [주요 기능](#주요-기능)
-- [데이터베이스 스키마](#데이터베이스-스키마)
-- [ER 다이어그램](#er-다이어그램)
-- [API 문서](#api-문서)
-- [실행 방법](#실행-방법)
-
----
-
-## 기술 스택
-
-- **런타임**: Node.js
-- **프레임워크**: Express.js
+## 🚀 배포 환경
+- **프론트엔드**: Vercel
+- **서버**: AWS EC2  
 - **데이터베이스**: MySQL
-- **인증**: JWT (JSON Web Token)
-- **문서화**: Swagger (OpenAPI)
-- **기타 라이브러리**:
-  - dotenv: 환경변수 관리
-  - cors: CORS 정책 처리
-  - mysql2: MySQL 연결 및 쿼리
-  - bcrypt: 비밀번호 암호화
-  - nodemon: 개발용 자동 재시작
+
+## 🌐 서비스 링크
+**↗️ [Seoul Shelf 체험하기](https://seoulshelftest.vercel.app/)**
+
+**📂 [프론트엔드 레포지토리](https://github.com/SeoulDataHub/main)**
+
+> 구글 로그인으로 간편하게 시작하고 좋아하는 책에 후기를 남겨보세요.
+
+## 🛠 사용 기술
+- **Backend**: Node.js, Express.js
+- **Database**: MySQL
+- **로그인**: 구글 로그인 + JWT
+- **API 문서**: Swagger
+- **배포**: AWS EC2
 
 ---
 
-## 주요 기능
+## ✨ 주요 기능
 
-### 1. 인증 및 사용자 관리
-- JWT 기반 로그인/인증
-- OAuth(구글 등) 지원
-- 사용자 정보 조회
+### 🔐 간편 로그인
+- 구글 계정으로 바로 로그인 (회원가입 필요 없음)
+- 한 번 로그인하면 7일 동안 자동 로그인
 
-### 2. 도서 관리
-- 인기 도서, 도서 검색, 상세 정보 제공
-- 추천 도서(봄 추천 등) 제공
+### 📖 책 후기 쓰기
+- 별점 5점 + 글로 후기 작성
+- 모든 후기의 평균 별점 자동 계산
+- 내가 쓴 후기는 언제든 수정/삭제 가능
 
-### 3. 코멘트/답글/좋아요/스크랩
-- 책별 코멘트 작성, 수정, 삭제
-- 코멘트에 답글 작성, 수정, 삭제
-- 코멘트 좋아요/스크랩/읽고싶어요/읽었어요 관리
-- 내 코멘트/답글/스크랩/읽고싶어요/읽었어요 조회
+### 💬 다른 사람들과 소통
+- 후기에 댓글 달기
+- 마음에 드는 후기에 좋아요 누르기
+- 내 후기에 좋아요나 댓글 달리면 알림 받기
 
-### 4. 알림 시스템
-- 댓글, 답글, 좋아요 등 이벤트 발생 시 알림 생성
-- 알림 읽음 처리 및 전체 읽음 처리
+### 📝 나만의 독서 기록
+- **읽은 책** - 다 읽은 책들 모아보기
+- **읽고 싶은 책** - 읽고 싶은 책 저장해두기  
+- **스크랩** - 좋은 후기들 저장해두기
 
-### 5. 통계 및 인기 기능
-- 인기 도서, 인기 코멘트 등 집계 제공
-
----
-
-## 데이터베이스 스키마
-
-### 1. users
-| 필드           | 타입           | 설명           | 제약조건                |
-|----------------|---------------|----------------|-------------------------|
-| id             | INT           | 사용자 ID      | PK, AUTO_INCREMENT      |
-| oauth_id       | VARCHAR(255)  | OAuth ID       | UNIQUE, NOT NULL        |
-| provider       | VARCHAR(20)   | OAuth 제공자   | NOT NULL                |
-| email          | VARCHAR(255)  | 이메일         |                         |
-| name           | VARCHAR(100)  | 이름           |                         |
-| profile_image  | TEXT          | 프로필 이미지  |                         |
-| created_at     | TIMESTAMP     | 생성일         | DEFAULT CURRENT_TIMESTAMP|
-
-### 2. books
-| 필드           | 타입           | 설명           | 제약조건                |
-|----------------|---------------|----------------|-------------------------|
-| id             | INT           | 책 ID          | PK, AUTO_INCREMENT      |
-| title          | TEXT          | 제목           |                         |
-| author         | TEXT          | 저자           |                         |
-| publisher      | TEXT          | 출판사         |                         |
-| publication_year| INT          | 출판년도       |                         |
-| loan_count     | INT           | 대출 횟수      |                         |
-| image_url      | VARCHAR(255)  | 이미지 URL     |                         |
-| isbn           | VARCHAR(20)   | ISBN           |                         |
-
-### 3. comments
-| 필드           | 타입           | 설명           | 제약조건                |
-|----------------|---------------|----------------|-------------------------|
-| id             | INT           | 코멘트 ID      | PK, AUTO_INCREMENT      |
-| user_id        | INT           | 작성자 ID      | FK(users.id), NOT NULL  |
-| book_id        | INT           | 책 ID          | FK(books.id), NOT NULL  |
-| content        | TEXT          | 내용           |                         |
-| rating         | INT           | 평점           |                         |
-| created_at     | DATETIME      | 작성일         | DEFAULT CURRENT_TIMESTAMP|
-| updated_at     | TIMESTAMP     | 수정일         | DEFAULT CURRENT_TIMESTAMP ON UPDATE |
-
-### 4. comment_likes
-| 필드           | 타입           | 설명           | 제약조건                |
-|----------------|---------------|----------------|-------------------------|
-| id             | INT           | ID             | PK, AUTO_INCREMENT      |
-| user_id        | INT           | 사용자 ID      | FK(users.id), NOT NULL  |
-| comment_id     | INT           | 코멘트 ID      | FK(comments.id), NOT NULL|
-| created_at     | DATETIME      | 생성일         | DEFAULT CURRENT_TIMESTAMP|
-
-### 5. comment_replies
-| 필드           | 타입           | 설명           | 제약조건                |
-|----------------|---------------|----------------|-------------------------|
-| id             | INT           | 답글 ID        | PK, AUTO_INCREMENT      |
-| comment_id     | INT           | 코멘트 ID      | FK(comments.id), NOT NULL|
-| user_id        | INT           | 작성자 ID      | FK(users.id), NOT NULL  |
-| content        | TEXT          | 답글 내용      | NOT NULL                |
-| created_at     | TIMESTAMP     | 작성일         | DEFAULT CURRENT_TIMESTAMP|
-
-### 6. comment_scraps
-| 필드           | 타입           | 설명           | 제약조건                |
-|----------------|---------------|----------------|-------------------------|
-| id             | INT           | 스크랩 ID      | PK, AUTO_INCREMENT      |
-| user_id        | INT           | 사용자 ID      | FK(users.id), NOT NULL  |
-| comment_id     | INT           | 코멘트 ID      | FK(comments.id), NOT NULL|
-| created_at     | DATETIME      | 생성일         | DEFAULT CURRENT_TIMESTAMP|
-
-### 7. notifications
-| 필드           | 타입           | 설명           | 제약조건                |
-|----------------|---------------|----------------|-------------------------|
-| id             | INT           | 알림 ID        | PK, AUTO_INCREMENT      |
-| user_id        | INT           | 수신자 ID      | FK(users.id), NOT NULL  |
-| sender_id      | INT           | 발신자 ID      | FK(users.id), NOT NULL  |
-| type           | VARCHAR(50)   | 알림 타입      | NOT NULL                |
-| content_id     | INT           | 관련 컨텐츠 ID |                         |
-| message        | TEXT          | 메시지         | NOT NULL                |
-| read           | TINYINT(1)    | 읽음 여부      | DEFAULT 0               |
-| created_at     | TIMESTAMP     | 생성일         | DEFAULT CURRENT_TIMESTAMP|
-
-### 8. read_books
-| 필드           | 타입           | 설명           | 제약조건                |
-|----------------|---------------|----------------|-------------------------|
-| id             | INT           | ID             | PK, AUTO_INCREMENT      |
-| user_id        | INT           | 사용자 ID      | FK(users.id), NOT NULL  |
-| book_id        | INT           | 책 ID          | FK(books.id), NOT NULL  |
-| created_at     | DATETIME      | 생성일         | DEFAULT CURRENT_TIMESTAMP|
-
-### 9. want_to_read
-| 필드           | 타입           | 설명           | 제약조건                |
-|----------------|---------------|----------------|-------------------------|
-| id             | INT           | ID             | PK, AUTO_INCREMENT      |
-| user_id        | INT           | 사용자 ID      | FK(users.id), NOT NULL  |
-| book_id        | INT           | 책 ID          | FK(books.id), NOT NULL  |
-| created_at     | DATETIME      | 생성일         | DEFAULT CURRENT_TIMESTAMP|
-
-### 10. wants
-| 필드           | 타입           | 설명           | 제약조건                |
-|----------------|---------------|----------------|-------------------------|
-| id             | INT           | ID             | PK, AUTO_INCREMENT      |
-| user_id        | INT           | 사용자 ID      | FK(users.id), NOT NULL  |
-| book_id        | INT           | 책 ID          | FK(books.id), NOT NULL  |
-| created_at     | TIMESTAMP     | 생성일         | DEFAULT CURRENT_TIMESTAMP|
+### 🔍 책 찾기
+- 책 제목이나 출판사로 검색
+- 인기 도서 TOP 20 보기
+- 계절별 추천 도서
+- 가장 인기 있는 후기 보기
 
 ---
 
-## ER 다이어그램
+## 🎯 왜 만들었나요?
 
-```mermaid
-erDiagram
-    USERS ||--o{ COMMENTS : writes
-    USERS ||--o{ COMMENT_LIKES : likes
-    USERS ||--o{ COMMENT_REPLIES : replies
-    USERS ||--o{ COMMENT_SCRAPS : scraps
-    USERS ||--o{ NOTIFICATIONS : receives
-    USERS ||--o{ READ_BOOKS : reads
-    USERS ||--o{ WANT_TO_READ : wants
-    USERS ||--o{ WANTS : wants2
+### ✅ 기존 문제점
+- 책을 읽고 나서 감상을 나눌 사람이 없음
+- 기존 독서 앱들은 기능이 너무 많고 복잡함
+- 좋은 책을 추천받기 어려움
+- 후기를 작성해도 반응이 없어서 아쉬움
 
-    BOOKS ||--o{ COMMENTS : "has"
-    BOOKS ||--o{ READ_BOOKS : "is read"
-    BOOKS ||--o{ WANT_TO_READ : "is wanted"
-    BOOKS ||--o{ WANTS : "is wanted2"
+### 💡 해결 방법
+- 구글 로그인으로 가입 절차 제거
+- 꼭 필요한 기능만 포함하여 사용하기 쉽게 구현
+- 알림 기능으로 활발한 소통 유도
+- 다양한 방식으로 새로운 책 추천
 
-    COMMENTS ||--o{ COMMENT_LIKES : "liked by"
-    COMMENTS ||--o{ COMMENT_REPLIES : "has replies"
-    COMMENTS ||--o{ COMMENT_SCRAPS : "scrapped by"
+---
 
-    COMMENTS ||--o{ NOTIFICATIONS : "triggers"
-    COMMENT_REPLIES ||--o{ NOTIFICATIONS : "triggers"
+## 💻 핵심 기술 구현
+
+### 1. 구글 로그인 구현
+OAuth가 무엇인지 찾아보면서 하나씩 구현했습니다.
+
+```javascript
+// 구글에서 사용자 정보 받아오고
+const userRes = await axios.get("https://www.googleapis.com/oauth2/v2/userinfo", {
+  headers: { Authorization: `Bearer ${accessToken}` }
+});
+
+// 우리 DB에 없으면 자동으로 회원가입
+if (!user) {
+  const userId = await User.createUser({ oauth_id, provider, email, name });
+}
+
+// JWT 토큰 생성하여 프론트엔드로 전송
+const token = createToken(user);
 ```
 
----
+### 2. 알림 기능
+다른 사용자가 내 후기에 좋아요를 누르거나 댓글을 달면 알림을 보내는 기능입니다.
 
-## API 문서
+```javascript
+// 자기 자신에게는 알림을 보내지 않음
+if (comment.user_id !== userId) {
+  await notificationController.sendNotificationToUser(
+    comment.user_id, userId, 'COMMENT_LIKE', commentId,
+    `${req.user.name}님이 회원님의 코멘트에 좋아요를 눌렀습니다.`
+  );
+}
+```
 
-- Swagger(OpenAPI) 기반 문서 제공  
-- `/api-docs` 경로에서 전체 API 명세 확인 가능
+### 3. 평균 별점 계산
+새로운 후기가 추가될 때마다 책의 평균 별점을 실시간으로 계산합니다.
 
-### 인증
-- `POST /auth/login` - 로그인
-- `POST /auth/logout` - 로그아웃
+```javascript
+// 한 번의 쿼리로 책 정보와 평균 별점을 함께 조회
+SELECT b.title, b.author, COALESCE(AVG(c.rating), 0) as average_rating
+FROM books b LEFT JOIN comments c ON b.id = c.book_id
+WHERE b.id = ?
+GROUP BY b.id
+```
 
-### 도서
-- `GET /books/popular` - 인기 도서 조회
-- `GET /books/search?q=검색어` - 도서 검색
-- `GET /books/:id` - 도서 상세 정보
-- `GET /spring-books` - 봄 추천 도서
-
-### 코멘트
-- `POST /comments` - 코멘트 작성
-- `PUT /comments/:id` - 코멘트 수정
-- `DELETE /comments/:id` - 코멘트 삭제
-- `GET /comments/:bookId` - 특정 책의 코멘트 목록 조회
-- `GET /my-comments` - 내가 쓴 코멘트 목록 조회
-- `POST /comments/:commentId/like` - 좋아요 토글
-- `DELETE /comments/:commentId/like` - 좋아요 취소
-- `GET /comments/:commentId/like-count` - 좋아요 수 조회
-- `POST /comments/:commentId/reply` - 답글 작성
-- `PUT /comment-replies/:replyId` - 답글 수정
-- `DELETE /comment-replies/:replyId` - 답글 삭제
-- `GET /my-replies` - 내가 쓴 답글 목록 조회
-- `POST /comment-scraps/:commentId` - 코멘트 스크랩
-- `DELETE /comment-scraps/:commentId` - 스크랩 취소
-- `GET /my-scraps` - 내 스크랩 목록 조회
-
-### 읽고싶어요/읽었어요
-- `POST /want-to-read/:bookId` - 읽고싶어요 등록
-- `DELETE /want-to-read/:bookId` - 읽고싶어요 취소
-- `GET /my-wants` - 내가 읽고싶어요 등록한 책 목록
-- `POST /read-books/:bookId` - 읽었어요 등록
-- `DELETE /read-books/:bookId` - 읽었어요 취소
-- `GET /my-reads` - 내가 읽은 책 목록
-
-### 알림
-- `GET /notifications` - 내 알림 목록 조회
-- `PATCH /notifications/:notification_id` - 알림 읽음 처리
-- `PATCH /notifications/read-all` - 전체 알림 읽음 처리
-
-### 통계/인기
-- `GET /popular-books` - 인기 도서 목록
-- `GET /popular-comments` - 인기 코멘트 목록
+### 4. API 문서 작성
+Swagger를 활용하여 API 문서를 자동으로 생성했습니다.
 
 ---
 
-## 실행 방법
+## 🗂 데이터 수집 및 처리
 
-1. `.env` 파일에 환경변수(DB 정보, JWT 시크릿 등) 설정
-2. MySQL DB 및 테이블 생성
-3. 의존성 설치
-    ```bash
-    npm install
-    ```
-4. 서버 실행
-    ```bash
-    npm start
-    ```
-5. Swagger API 문서 확인
-    - [http://localhost:포트번호/api-docs](http://localhost:포트번호/api-docs)
+### 📚 서울시 공공데이터 활용
+서울시에서 제공하는 **서울도서관 공공데이터**를 활용하여 실제 도서 정보를 데이터베이스에 구축했습니다.
 
----
+### 📚 알라딘 API 연동
+서울시 공공데이터에는 책 이미지가 없어서 **ISBN 코드로 알라딘 API를 호출**하여 책 표지 이미지를 수집했습니다.
 
-## 기타
+### 📊 데이터 처리 결과
+- **기본 도서 정보**: 서울도서관 공공데이터에서 제목, 저자, 출판사, ISBN
+- **책 표지 이미지**: 알라딘 API로 ISBN 검색하여 이미지 URL 수집
+- **데이터 정제**: 중복 제거, 형식 통일, 누락 정보 보완
+- **검색 최적화**: 제목, 저자, 출판사 기준 검색 가능하도록 인덱싱
 
-- 모든 주요 API는 JWT 인증 필요
-- Swagger 문서로 API 테스트 가능
-- DB 스키마 및 코드 구조는 확장/유지보수에 용이하게 설계
+실제 도서관 데이터를 사용하니 사용자들이 더 신뢰하게 되었습니다.
 
 ---
 
-## 서비스 링크
-프론트 깃허브 링크 - https://github.com/SeoulDataHub/main
-서비스 URL - https://seoulshelftest.vercel.app/
+## 📊 데이터베이스 구조
 
-**문의 및 개선 요청은 언제든 환영합니다!**
+간단하게 설계해봤어요:
+
+- **users**: 사용자 정보 (구글 로그인 정보)
+- **books**: 책 정보
+- **comments**: 후기 (별점 + 글)
+- **comment_likes**: 좋아요 정보
+- **notifications**: 알림 정보
+- **wants/reads**: 읽고싶은책/읽은책
+- **scraps**: 스크랩한 후기들
+
+---
+
+## 📈 만들면서 배운 것들
+
+### 🎯 잘된 점
+- 처음 해본 OAuth 로그인 성공적으로 구현
+- 복잡한 기능들을 단순하게 만들어서 사용하기 편함
+- 알림 시스템으로 사용자들이 서로 소통하게 함
+- API 문서화까지 해서 협업하기 좋게 만듦
+
+### 📚 학습한 기술들
+- **OAuth 2.0**: 구글 로그인 전체 과정 구현
+- **JWT**: 토큰 기반 인증 방식
+- **MySQL JOIN**: 여러 테이블 연결하여 데이터 조회
+- **Swagger**: API 문서 자동 생성
+- **AWS 배포**: EC2 서버에 직접 배포
+
+### 🔧 해결해야 했던 문제들
+- OAuth 콜백 처리 시 프론트엔드와 연결하는 부분
+- 자신에게는 알림을 보내지 않는 로직 구현
+- 후기 수정 시 변경된 부분만 업데이트하는 효율적인 쿼리
+- 향후 기능 추가가 용이한 코드 구조 설계
+
+### 💡 향후 개선 계획
+- 같은 책을 읽는 사람들끼리 모임 기능
+- 사용자 선호 장르 분석을 통한 개인 맞춤 책 추천
+- 월별 독서 통계 및 목표 설정 기능
+- 카카오톡 등 다중 로그인 서비스 지원
